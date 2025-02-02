@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی ۲۱ - بلک جک</title>
+    <style>
+        :root {
+            --gold: #FFD700;
+            --red: #DC143C;
+            --dark: #1a1a1a;
+            --casino-bg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23ffd700" opacity="0.1" width="100" height="100"/><path d="M50 0L100 50L50 100L0 50Z" fill="%23dc143c" opacity="0.1"/><circle cx="50" cy="50" r="20" fill="%231a1a1a" opacity="0.1"/></svg>');
+        }
+
+        body {
+            background: var(--casino-bg), linear-gradient(135deg, var(--dark), #2a2a2a);
+            background-size: 200px 200px;
+            color: white;
+            font-family: Tahoma;
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .header h1 {
+            color: var(--gold);
+            font-size: 1.5rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .player-area {
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid var(--gold);
+        }
+
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .card {
+            font-size: 2rem;
+            line-height: 1;
+            padding: 5px;
+            background: white;
+            color: black;
+            border-radius: 5px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .score {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin: 10px 0;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        button {
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .bets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+
+        .bet-chip {
+            background: var(--red);
+            color: white;
+        }
+
+        .message {
+            position: fixed;
+            top: 10px; /* پیام‌ها در بالای صفحه نمایش داده می‌شوند */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid var(--gold);
+            text-align: center;
+            display: none;
+            z-index: 10;
+            width: 90%;
+            max-width: 300px;
+            font-size: 0.9rem;
+        }
+
+        .bet-display {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 1rem;
+            color: var(--gold);
+        }
+
+        .hidden-card {
+            filter: brightness(0.6);
+        }
+
+        .restart-button {
+            display: none; /* دکمه شروع مجدد ابتدا مخفی است */
+            margin-top: 20px;
+        }
+        
+               .instructions {
+            margin-top: 10px;
+            padding: 10px;
+            #background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            border: 2px solid var(--gold);
+            color: var(--light-orange);
+            font-size: 0.7rem;
+            line-height: 1.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> ..::  بازی Blackjack  - 21  ::.. </h1>
+            
+            
+            
+        </div>
+<!-- دستور بازی -->
+        <div class="instructions">
+روش بازی ۲۱:
+    تا زمانی که جمع اعداد کارتها به ۲۱ نرسیده باشد، نباخته اید. اگر جمع کارت‌های شما از حریف بیشتر باشد برنده می شوید و مبلغ شرط بندی از حساب او کم شده به حساب شما می آید. در هنگام بازی می توانید مبلغ شرط بندی را زیاد کنید. کارت های غیرعددی و به اصطلاح 'صورت' مثل سرباز یا شاه همه ۱۰ امتیازی هستند و کارت 'آس' بسته به جمع کارت بازیکن می تواند یک یا یازده امتیازی در نظر گرفته شود تا او برنده شود. مثلاً جمع دو آس کنار هم ۱۱+۱ می شود ولی یک آس با یک صورت مثل ملکه جمعش ۱۱+۱۰ یعنی ۲۱ شده و برنده است.
+        </div>
+        <div class="player-area dealer">
+            <div class="score">
+                <span>💻 بانکدار: <span id="dealer-score">0</span></span>
+                <span>💰: $<span id="dealer-cash">1000</span></span>
+            </div>
+            <div class="cards" id="dealer-cards"></div>
+        </div>
+
+        <div class="bet-display">
+            شرط فعلی: $<span id="current-bet">10</span>
+        </div>
+
+        <div class="player-area player">
+            <div class="score">
+                <span>👤 شما: <span id="player-score">0</span></span>
+                <span>💰: $<span id="player-cash">1000</span></span>
+            </div>
+            <div class="cards" id="player-cards"></div>
+        </div>
+
+        <div class="controls">
+            <button onclick="hit()">کارت (H)</button>
+            <button onclick="stand()">بمان (S)</button>
+        </div>
+
+        <div class="bets">
+            <button class="bet-chip" onclick="setBet(10)">$10</button>
+            <button class="bet-chip" onclick="setBet(25)">$25</button>
+            <button class="bet-chip" onclick="setBet(50)">$50</button>
+            <button class="bet-chip" onclick="setBet(100)">$100</button>
+            
+            
+            
+        </div>
+        
+        
+        
+    </div>
+
+
+
+
+    <!-- پیام‌های بازی -->
+
+    <div class="message" id="message">
+        <h2 id="message-text"></h2>
+        <button onclick="newRound()">ادامه</button>
+    </div>
+
+
+    <!-- دکمه شروع مجدد -->
+    <button class="restart-button" id="restart-button" onclick="restartGame()">شروع مجدد بازی</button>
+
+
+
+    <script>
+        let game = {
+            bet: 10,
+            playerCash: 1000,
+            dealerCash: 1000,
+            playerHand: [],
+            dealerHand: [],
+            gameActive: false
+        };
+
+        function getCard() {
+            const suits = ['♠','♣','<font color="red">♥</font>','<font color="red">♦</font>'];
+            const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+            return {
+                suit: suits[Math.floor(Math.random()*4)],
+                value: values[Math.floor(Math.random()*13)]
+            };
+        }
+
+        function calculateScore(hand) {
+            let score = 0;
+            let aces = 0;
+            
+            hand.forEach(card => {
+                const value = card.value;
+                if(value === 'A') {
+                    aces++;
+                    score += 11;
+                } else if(['J','Q','K'].includes(value)) {
+                    score += 10;
+                } else {
+                    score += parseInt(value);
+                }
+            });
+            
+            while(score > 21 && aces > 0) {
+                score -= 10;
+                aces--;
+            }
+            return score;
+        }
+
+        function dealerTurn() {
+            let score = calculateScore(game.dealerHand);
+            let hasAce = game.dealerHand.some(card => card.value === 'A');
+
+            // افزایش شرط بانکدار در صورت شرایط مناسب
+            if (score >= 17 && score <= 21 && Math.random() < 0.5) {
+                const maxAdditionalBet = Math.min(100, game.dealerCash);
+                if (maxAdditionalBet > 0) {
+                    game.bet += maxAdditionalBet;
+                    game.dealerCash -= maxAdditionalBet;
+                    updateUI();
+                }
+            }
+
+            while(score < 17 || (score === 17 && hasAce)) {
+                const newCard = getCard();
+                game.dealerHand.push(newCard);
+                score = calculateScore(game.dealerHand);
+                hasAce = hasAce || newCard.value === 'A';
+                if(score > 21) break;
+            }
+            
+            updateUI();
+            endGame();
+        }
+
+        function endGame() {
+            game.gameActive = false;
+            const playerScore = calculateScore(game.playerHand);
+            const dealerScore = calculateScore(game.dealerHand);
+            
+            let result;
+            if(playerScore > 21) {
+                result = 'باخت! جمع امتیاز شما بیش از ۲۱ شد';
+                game.playerCash -= game.bet;
+                game.dealerCash += game.bet;
+            } else if(dealerScore > 21) {
+                result = 'برد! بانکدار باخت';
+                game.playerCash += game.bet;
+                game.dealerCash -= game.bet;
+            } else if(playerScore > dealerScore) {
+                result = 'برد! امتیاز شما بیشتر است';
+                game.playerCash += game.bet;
+                game.dealerCash -= game.bet;
+            } else if(dealerScore > playerScore) {
+                result = 'باخت! بانکدار امتیاز بیشتری دارد';
+                game.playerCash -= game.bet;
+                game.dealerCash += game.bet;
+            } else {
+                result = 'مساوی!';
+            }
+            
+            showMessage(`${result}<br>شما: ${playerScore} | بانکدار: ${dealerScore}`);
+            updateUI();
+
+            // اگر موجودی بازیکن یا بانکدار تمام شود، دکمه شروع مجدد نمایش داده شود
+            if (game.playerCash <= 0 || game.dealerCash <= 0) {
+                document.getElementById('restart-button').style.display = 'block';
+            }
+        }
+
+        function showMessage(text) {
+            document.getElementById('message-text').innerHTML = text;
+            document.getElementById('message').style.display = 'block';
+        }
+
+        function newRound() {
+            if(game.playerCash <= 0 || game.dealerCash <= 0) {
+                showMessage(game.playerCash > 0 ? 
+                    "🎉 شما برنده شدید!" : 
+                    "💸 امتیاز شما تمام شد!");
+                return;
+            }
+            
+            document.getElementById('message').style.display = 'none';
+            game.playerHand = [getCard(), getCard()];
+            game.dealerHand = [getCard(), getCard()];
+            game.gameActive = true;
+            game.bet = 10; // بازنشانی شرط به ۱۰ دلار در هر دور جدید
+            
+            const playerScore = calculateScore(game.playerHand);
+            const dealerScore = calculateScore(game.dealerHand);
+            if(playerScore === 21 || dealerScore === 21) {
+                endGame();
+            }
+            
+            updateUI();
+        }
+
+        function hit() {
+            if(!game.gameActive) return;
+            game.playerHand.push(getCard());
+            const score = calculateScore(game.playerHand);
+            if(score > 21) endGame();
+            else updateUI();
+        }
+
+        function stand() {
+            if(!game.gameActive) return;
+            dealerTurn();
+        }
+
+        function setBet(amount) {
+            if (amount > game.playerCash) {
+                showMessage("❌ موجودی کافی نیست!");
+                return;
+            }
+            game.bet = amount;
+            document.getElementById('current-bet').textContent = game.bet;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('player-cards').innerHTML = 
+                game.playerHand.map(card => `
+                    <div class="card">${card.suit}${card.value}</div>
+                `).join('');
+
+            document.getElementById('dealer-cards').innerHTML = 
+                game.dealerHand.map((card, i) => `
+                    <div class="card ${game.gameActive && i === 0 ? 'hidden-card' : ''}">
+                        ${game.gameActive && i === 0 ? '<span style="font-size:3rem;">🂠</span>' : card.suit+card.value}
+                    </div>
+                `).join('');
+
+            document.getElementById('player-score').textContent = 
+                calculateScore(game.playerHand);
+            document.getElementById('dealer-score').textContent = 
+                game.gameActive ? '?' : calculateScore(game.dealerHand);
+
+            document.getElementById('player-cash').textContent = game.playerCash;
+            document.getElementById('dealer-cash').textContent = game.dealerCash;
+            document.getElementById('current-bet').textContent = game.bet;
+        }
+
+        // تابع شروع مجدد بازی
+        function restartGame() {
+            game.playerCash = 1000;
+            game.dealerCash = 1000;
+            game.bet = 10;
+            game.playerHand = [];
+            game.dealerHand = [];
+            game.gameActive = false;
+            document.getElementById('restart-button').style.display = 'none';
+            newRound();
+        }
+
+        newRound();
+    </script>
+</body>
+</html>
